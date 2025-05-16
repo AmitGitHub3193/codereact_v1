@@ -1,67 +1,48 @@
 import React, { useState } from 'react'
-import TodoItem from './components/TodoItem'
+import UserForm from './components/UserForm'
+import UserList from './components/UserList'
 
 function App() {
-  const [todos, setTodos] = useState([])
-  const [input, setInput] = useState('')
+  const [users, setUsers] = useState([])
+  const [editingUser, setEditingUser] = useState(null)
 
-  const addTodo = (e) => {
-    e.preventDefault()
-    if (input.trim()) {
-      setTodos([...todos, { id: Date.now(), text: input.trim(), completed: false }])
-      setInput('')
-    }
+  const addUser = (user) => {
+    setUsers([...users, { ...user, id: Date.now() }])
   }
 
-  const toggleTodo = (id) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+  const updateUser = (updatedUser) => {
+    setUsers(users.map(user => 
+      user.id === updatedUser.id ? updatedUser : user
     ))
+    setEditingUser(null)
   }
 
-  const deleteTodo = (id) => {
-    setTodos(todos.filter(todo => todo.id !== id))
+  const deleteUser = (id) => {
+    setUsers(users.filter(user => user.id !== id))
+  }
+
+  const startEditing = (user) => {
+    setEditingUser(user)
   }
 
   return (
     <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-4xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          React Todo App
+          User Management System
         </h1>
         
-        <form onSubmit={addTodo} className="mb-8">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Add a new todo..."
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none"
-            >
-              Add
-            </button>
-          </div>
-        </form>
+        <UserForm 
+          onSubmit={editingUser ? updateUser : addUser}
+          initialData={editingUser}
+          key={editingUser?.id || 'new'}
+        />
 
-        <div className="space-y-2">
-          {todos.map(todo => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={toggleTodo}
-              onDelete={deleteTodo}
-            />
-          ))}
-        </div>
-        
-        {todos.length === 0 && (
-          <p className="text-center text-gray-500">No todos yet. Add one above!</p>
-        )}
+        <UserList 
+          users={users}
+          onEdit={startEditing}
+          onDelete={deleteUser}
+        />
       </div>
     </div>
   )
